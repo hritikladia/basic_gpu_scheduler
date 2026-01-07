@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GPU Scheduler</title>
+</head>
+<body>
+  <h1>GPU Scheduler</h1>
+
+  <h2>Submit Job</h2>
+  <form id="jobForm">
+    Image: <input id="image" value="python:3.10"><br>
+    Script: <input id="script" value="train.py"><br>
+    GPUs: <input id="gpus" value="0"><br>
+    User: <input id="user" value="hritik"><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <h2>Jobs</h2>
+  <button onclick="loadJobs()">Refresh</button>
+  <ul id="jobs"></ul>
+
+<script>
+async function loadJobs() {
+  const res = await fetch("/jobs");
+  const data = await res.json();
+  const list = document.getElementById("jobs");
+  list.innerHTML = "";
+
+  data.jobs.forEach(job => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <b>${job.job_id}</b> — ${job.status}
+      <a href="/job_view?job_id=${job.job_id}">view</a>
+    `;
+    list.appendChild(li);
+  });
+}
+
+document.getElementById("jobForm").onsubmit = async (e) => {
+  e.preventDefault();
+  await fetch("/jobs/submit", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      image: image.value,
+      script: script.value,
+      gpus: gpus.value,
+      user: user.value
+    })
+  });
+  loadJobs();
+};
+
+loadJobs();
+</script>
+</body>
+</html>

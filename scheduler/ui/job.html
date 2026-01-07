@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job View</title>
+</head>
+<body>
+  <h1>Job</h1>
+  <pre id="job"></pre>
+
+  <h2>Logs</h2>
+  <pre id="logs"></pre>
+
+  <button onclick="stopJob()">Stop Job</button>
+  <button onclick="load()">Refresh</button>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get("job_id");
+
+async function load() {
+  const jobRes = await fetch(`/jobs/${jobId}`);
+  const job = await jobRes.json();
+  document.getElementById("job").innerText =
+    JSON.stringify(job, null, 2);
+
+  const logRes = await fetch(`/job/${jobId}/logs`);
+  const logs = await logRes.json();
+  document.getElementById("logs").innerText =
+    logs.join("\n");
+}
+
+async function stopJob() {
+  await fetch(`/admin/stop_job/${jobId}`, {method: "POST"});
+  alert("Stop requested");
+}
+
+load();
+</script>
+</body>
+</html>
